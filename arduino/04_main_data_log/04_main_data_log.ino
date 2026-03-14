@@ -38,7 +38,7 @@ void setup() {
   Serial.println("SD card success");
 
   if (!SD.exists("/data.csv")) {
-    File dataFile = SD.open("/data.csv", FILE_WRITE);
+    File dataFile = SD.open("/data.csv", FILE_APPEND);
     if (dataFile) {
       dataFile.println("timestamp,temperature_c,humidity_pct,pressure_hpa");
       dataFile.close();
@@ -81,7 +81,7 @@ void logData() {
                String(humidity, 2) + "," +
                String(pressure, 2);
 
-  File dataFile = SD.open("/data.csv", FILE_WRITE);
+  File dataFile = SD.open("/data.csv", FILE_APPEND);
   if (dataFile) {
     dataFile.println(row);
     dataFile.close();
