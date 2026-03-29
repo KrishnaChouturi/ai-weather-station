@@ -7,6 +7,8 @@ from sklearn.metrics import accuracy_score, f1_score, classification_report
 df = pd.read_csv("weather_clean.csv")
 
 df["time"] = pd.to_datetime(df["time"])
+df = df[df["time"].dt.month.isin([3, 4, 5, 6, 7])]
+
 df["month"] = df["time"].dt.month
 df["pressure_change"] = df["pressure"].diff().fillna(0)
 
