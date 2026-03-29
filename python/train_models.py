@@ -32,7 +32,6 @@ print(f"Accuracy: {accuracy:.2%}")
 print(f"F1 Score: {f1:.2f}")
 print(classification_report(y_test, y_pred, target_names=["no rain", "rain"]))
 
-# show which features the model found most important
 importances = pd.Series(model.feature_importances_, index=features)
 print("\nFeature importances:")
 print(importances.sort_values(ascending=False))
