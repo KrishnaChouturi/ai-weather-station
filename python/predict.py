@@ -13,7 +13,7 @@ df = pd.read_csv("local_data/carmel_week1.csv")
 
 
 # IMPORTANT: change this to the exact time you plugged in the station
-session_start = pd.Timestamp("2026-04-05 09:00")
+session_start = pd.Timestamp("2026-04-12 20:14")
 
 def uptime_to_timestamp(uptime_str):
     parts = uptime_str.replace("h", "").replace("m", "").replace("s", "").split()
@@ -25,6 +25,9 @@ def uptime_to_timestamp(uptime_str):
 
 df["timestamp"] = df["timestamp"].apply(uptime_to_timestamp)
 
+df["temperature_c"] = df["temperature_c"] - 4.0
+df["humidity_pct"] = df["humidity_pct"].clip(lower=0, upper=100)
+
 df["hour"] = df["timestamp"].dt.floor("h")
 hourly = df.groupby("hour").agg(
     temperature=("temperature_c", "mean"),
@@ -33,14 +36,15 @@ hourly = df.groupby("hour").agg(
     actual_rain=("rainfall_mm", "sum")
 ).reset_index()
 
-hourly["actual_rain"] = (hourly["actual_rain"] > 0).astype(int)
+hourly["actual_rain"] = (hourly["actual_rain"] >= 0.8382).astype(int)
 
 hourly["month"] = hourly["hour"].dt.month
+hourly["hour_val"] = hourly["hour"].dt.hour
 hourly["pressure_change"] = hourly["pressure"].diff().fillna(0)
 
 hourly = hourly.dropna()
 
-features = ["temperature", "humidity", "pressure", "month", "pressure_change"]
+features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val"]
 hourly["prediction_A"] = modelA.predict(hourly[features])
 hourly["prediction_B"] = modelB.predict(hourly[features])
 

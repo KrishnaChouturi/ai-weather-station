@@ -10,11 +10,12 @@ df["time"] = pd.to_datetime(df["time"])
 df = df[df["time"].dt.month.isin([3, 4, 5, 6, 7])]
 
 df["month"] = df["time"].dt.month
+df["hour_val"] = df["time"].dt.hour
 df["pressure_change"] = df["pressure"].diff().fillna(0)
 
-features = ["temperature", "humidity", "pressure", "month", "pressure_change"]
+features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val"]
 X = df[features]
-y = df["rain"]
+y = (df["rain"] > 0).astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
