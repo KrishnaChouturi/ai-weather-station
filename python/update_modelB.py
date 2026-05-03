@@ -27,7 +27,8 @@ hist = hist.rename(columns={"time": "timestamp"})
 session_starts = {
     "carmel_week1.csv": pd.Timestamp("2026-04-12 20:14"),
     "carmel_week2.csv": pd.Timestamp("2026-04-19 18:23"),
-    "carmel_week3.csv": pd.Timestamp("2026-04-26 09:00")
+    "carmel_week3.csv": pd.Timestamp("2026-04-26 21:43"),
+    "carmel_week4.csv": pd.Timestamp("2026-05-03 09:00")
 }
 
 def uptime_to_timestamp(uptime_str, session_start):
