@@ -9,8 +9,8 @@ with open("models/modelB_adaptive.pkl", "rb") as f:
     modelB = pickle.load(f)
 
 # Change filename here each week
-df = pd.read_csv("local_data/carmel_week3.csv")
-session_start = pd.Timestamp("2026-04-26 21:43")
+df = pd.read_csv("local_data/carmel_week4.csv")
+session_start = pd.Timestamp("2026-05-03 16:37")
 
 def uptime_to_timestamp(uptime_str):
     parts = uptime_str.replace("h", "").replace("m", "").replace("s", "").split()
@@ -20,6 +20,10 @@ def uptime_to_timestamp(uptime_str):
 df["timestamp"] = df["timestamp"].apply(uptime_to_timestamp)
 df["temperature_c"] = df["temperature_c"] - 4.0
 df["humidity_pct"] = df["humidity_pct"].clip(0, 100)
+
+# Added hardware spike filter
+df["rainfall_mm"] = df["rainfall_mm"].clip(upper=10.0)
+
 df["hour"] = df["timestamp"].dt.floor("h")
 
 hourly = df.groupby("hour").agg(
@@ -29,15 +33,23 @@ hourly = df.groupby("hour").agg(
     actual_rain=("rainfall_mm", "sum")
 ).reset_index()
 
+# Memory Features (Lags)
+for lag in [1, 2, 3]:
+    hourly[f"pressure_lag_{lag}"] = hourly["pressure"].shift(lag)
+    hourly[f"hum_lag_{lag}"] = hourly["humidity"].shift(lag)
+
 hourly["actual_rain"] = (hourly["actual_rain"] >= 0.8382).astype(int)
 hourly["month"] = hourly["hour"].dt.month
 hourly["hour_val"] = hourly["hour"].dt.hour
 hourly["pressure_change"] = hourly["pressure"].diff().fillna(0)
 hourly = hourly.dropna()
 
+# Feature lists
 features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val"]
+features_B = features + ["pressure_lag_1", "pressure_lag_2", "pressure_lag_3", "hum_lag_1", "hum_lag_2", "hum_lag_3"]
+
 hourly["prediction_A"] = modelA.predict(hourly[features])
-hourly["prediction_B"] = modelB.predict(hourly[features])
+hourly["prediction_B"] = modelB.predict(hourly[features_B])
 
 output = hourly[["hour", "actual_rain", "prediction_A", "prediction_B"]]
 output = output.rename(columns={"hour": "timestamp"})

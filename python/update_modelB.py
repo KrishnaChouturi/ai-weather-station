@@ -19,6 +19,11 @@ if not files:
 hist = pd.read_csv("weather_clean.csv")
 hist["time"] = pd.to_datetime(hist["time"])
 hist = hist[hist["time"].dt.month.isin([3, 4, 5, 6, 7])]
+
+for lag in [1, 2, 3]:
+    hist[f"pressure_lag_{lag}"] = hist["pressure"].shift(lag)
+    hist[f"hum_lag_{lag}"] = hist["humidity"].shift(lag)
+
 hist["month"] = hist["time"].dt.month
 hist["hour_val"] = hist["time"].dt.hour
 hist["pressure_change"] = hist["pressure"].diff().fillna(0)
@@ -28,7 +33,7 @@ session_starts = {
     "carmel_week1.csv": pd.Timestamp("2026-04-12 20:14"),
     "carmel_week2.csv": pd.Timestamp("2026-04-19 18:23"),
     "carmel_week3.csv": pd.Timestamp("2026-04-26 21:43"),
-    "carmel_week4.csv": pd.Timestamp("2026-05-03 09:00")
+    "carmel_week4.csv": pd.Timestamp("2026-05-03 16:37")
 }
 
 def uptime_to_timestamp(uptime_str, session_start):
@@ -48,6 +53,7 @@ for f in files:
         df["timestamp"] = df["timestamp"].apply(lambda x: uptime_to_timestamp(x, start))
         df["temperature_c"] = pd.to_numeric(df["temperature_c"], errors="coerce") - 4.0
         df["humidity_pct"] = pd.to_numeric(df["humidity_pct"], errors="coerce").clip(0, 100)
+        df["rainfall_mm"] = df["rainfall_mm"].clip(upper=10.0) # Added hardware clip
         all_local_frames.append(df)
 
 local = pd.concat(all_local_frames, ignore_index=True).dropna(subset=["timestamp"])
@@ -62,19 +68,28 @@ local_hourly = local.groupby("hour").agg(
     rain=("rainfall_mm", "sum")
 ).reset_index()
 
+# Local Memory Features
+for lag in [1, 2, 3]:
+    local_hourly[f"pressure_lag_{lag}"] = local_hourly["pressure"].shift(lag)
+    local_hourly[f"hum_lag_{lag}"] = local_hourly["humidity"].shift(lag)
+
 local_hourly["rain"] = (local_hourly["rain"] >= 0.8382).astype(int)
 local_hourly["month"] = local_hourly["hour"].dt.month
 local_hourly["hour_val"] = local_hourly["hour"].dt.hour
 local_hourly["pressure_change"] = local_hourly["pressure"].diff().fillna(0)
-local_hourly = local_hourly.rename(columns={"hour": "timestamp"})
+local_hourly = local_hourly.rename(columns={"hour": "timestamp"}).dropna()
 
-features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val"]
+# Updated feature list
+features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val",
+            "pressure_lag_1", "pressure_lag_2", "pressure_lag_3",
+            "hum_lag_1", "hum_lag_2", "hum_lag_3"]
 
-hist_X = hist[features].dropna()
-hist_y = hist.loc[hist_X.index, "rain"]
+hist = hist.dropna()
+hist_X = hist[features]
+hist_y = hist["rain"]
 
-local_X = local_hourly[features].dropna()
-local_y = local_hourly.loc[local_X.index, "rain"]
+local_X = local_hourly[features]
+local_y = local_hourly["rain"]
 
 LX_train, LX_test, Ly_train, Ly_test = train_test_split(local_X, local_y, test_size=0.2, random_state=42)
 
