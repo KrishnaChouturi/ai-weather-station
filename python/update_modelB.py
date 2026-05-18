@@ -33,7 +33,8 @@ session_starts = {
     "carmel_week1.csv": pd.Timestamp("2026-04-12 20:14"),
     "carmel_week2.csv": pd.Timestamp("2026-04-19 18:23"),
     "carmel_week3.csv": pd.Timestamp("2026-04-26 21:43"),
-    "carmel_week4.csv": pd.Timestamp("2026-05-03 16:37")
+    "carmel_week4.csv": pd.Timestamp("2026-05-03 16:37"),
+    "carmel_week5.csv": pd.Timestamp("2026-05-10 17:45")
 }
 
 def uptime_to_timestamp(uptime_str, session_start):
