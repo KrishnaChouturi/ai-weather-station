@@ -34,8 +34,10 @@ session_starts = {
     "carmel_week2.csv": pd.Timestamp("2026-04-19 18:23"),
     "carmel_week3.csv": pd.Timestamp("2026-04-26 21:43"),
     "carmel_week4.csv": pd.Timestamp("2026-05-03 16:37"),
-    "carmel_week5.csv": pd.Timestamp("2026-05-10 17:45")
+    "carmel_week5.csv": pd.Timestamp("2026-05-10 17:45"),
+    "carmel_week6.csv": pd.Timestamp("2026-05-17 20:23")
 }
+
 
 def uptime_to_timestamp(uptime_str, session_start):
     try:
@@ -45,16 +47,21 @@ def uptime_to_timestamp(uptime_str, session_start):
     except:
         return pd.NaT
 
+
 all_local_frames = []
 for f in files:
-    df = pd.read_csv(f)
     filename = os.path.basename(f)
+
+    if filename == "carmel_week5.csv":
+        continue
+
+    df = pd.read_csv(f)
     if filename in session_starts:
         start = session_starts[filename]
         df["timestamp"] = df["timestamp"].apply(lambda x: uptime_to_timestamp(x, start))
         df["temperature_c"] = pd.to_numeric(df["temperature_c"], errors="coerce") - 4.0
         df["humidity_pct"] = pd.to_numeric(df["humidity_pct"], errors="coerce").clip(0, 100)
-        df["rainfall_mm"] = df["rainfall_mm"].clip(upper=10.0) # Added hardware clip
+        df["rainfall_mm"] = df["rainfall_mm"].clip(upper=10.0)  # Added hardware clip
         all_local_frames.append(df)
 
 local = pd.concat(all_local_frames, ignore_index=True).dropna(subset=["timestamp"])
@@ -69,7 +76,6 @@ local_hourly = local.groupby("hour").agg(
     rain=("rainfall_mm", "sum")
 ).reset_index()
 
-# Local Memory Features
 for lag in [1, 2, 3]:
     local_hourly[f"pressure_lag_{lag}"] = local_hourly["pressure"].shift(lag)
     local_hourly[f"hum_lag_{lag}"] = local_hourly["humidity"].shift(lag)
