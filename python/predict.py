@@ -9,8 +9,8 @@ with open("models/modelB_adaptive.pkl", "rb") as f:
     modelB = pickle.load(f)
 
 # Change filename here each week
-df = pd.read_csv("local_data/carmel_week6.csv")
-session_start = pd.Timestamp("2026-05-17 20:23")
+df = pd.read_csv("local_data/carmel_week7.csv")
+session_start = pd.Timestamp("2026-05-24 18:46")
 
 def uptime_to_timestamp(uptime_str):
     parts = uptime_str.replace("h", "").replace("m", "").replace("s", "").split()
