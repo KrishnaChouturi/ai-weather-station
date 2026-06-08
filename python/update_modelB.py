@@ -36,7 +36,8 @@ session_starts = {
     "carmel_week4.csv": pd.Timestamp("2026-05-03 16:37"),
     "carmel_week5.csv": pd.Timestamp("2026-05-10 17:45"),
     "carmel_week6.csv": pd.Timestamp("2026-05-17 20:23"),
-    "carmel_week7.csv": pd.Timestamp("2026-05-24 18:46")
+    "carmel_week7.csv": pd.Timestamp("2026-05-24 18:46"),
+    "carmel_week8.csv": pd.Timestamp("2026-05-31 21:11")
 }
 
 
