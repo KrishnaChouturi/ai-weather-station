@@ -9,8 +9,8 @@ with open("models/modelB_adaptive.pkl", "rb") as f:
     modelB = pickle.load(f)
 
 # Change filename here each week
-df = pd.read_csv("local_data/carmel_week9.csv")
-session_start = pd.Timestamp("2026-06-07 20:57")
+df = pd.read_csv("local_data/carmel_week10.csv")
+session_start = pd.Timestamp("2026-06-14 23:54")
 
 def uptime_to_timestamp(uptime_str):
     parts = uptime_str.replace("h", "").replace("m", "").replace("s", "").split()
@@ -21,7 +21,6 @@ df["timestamp"] = df["timestamp"].apply(uptime_to_timestamp)
 df["temperature_c"] = df["temperature_c"] - 4.0
 df["humidity_pct"] = df["humidity_pct"].clip(0, 100)
 
-# Added hardware spike filter
 df["rainfall_mm"] = df["rainfall_mm"].clip(upper=10.0)
 
 df["hour"] = df["timestamp"].dt.floor("h")
@@ -44,7 +43,6 @@ hourly["hour_val"] = hourly["hour"].dt.hour
 hourly["pressure_change"] = hourly["pressure"].diff().fillna(0)
 hourly = hourly.dropna()
 
-# Feature lists
 features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val"]
 features_B = features + ["pressure_lag_1", "pressure_lag_2", "pressure_lag_3", "hum_lag_1", "hum_lag_2", "hum_lag_3"]
 

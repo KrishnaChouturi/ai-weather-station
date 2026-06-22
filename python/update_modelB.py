@@ -38,7 +38,8 @@ session_starts = {
     "carmel_week6.csv": pd.Timestamp("2026-05-17 20:23"),
     "carmel_week7.csv": pd.Timestamp("2026-05-24 18:46"),
     "carmel_week8.csv": pd.Timestamp("2026-05-31 21:11"),
-    "carmel_week9.csv": pd.Timestamp("2026-06-07 20:57")
+    "carmel_week9.csv": pd.Timestamp("2026-06-07 20:57"),
+    "carmel_week10.csv": pd.Timestamp("2026-06-14 23:54")
 }
 
 
@@ -89,7 +90,6 @@ local_hourly["hour_val"] = local_hourly["hour"].dt.hour
 local_hourly["pressure_change"] = local_hourly["pressure"].diff().fillna(0)
 local_hourly = local_hourly.rename(columns={"hour": "timestamp"}).dropna()
 
-# Updated feature list
 features = ["temperature", "humidity", "pressure", "month", "pressure_change", "hour_val",
             "pressure_lag_1", "pressure_lag_2", "pressure_lag_3",
             "hum_lag_1", "hum_lag_2", "hum_lag_3"]
