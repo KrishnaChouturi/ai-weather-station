@@ -1,482 +1,338 @@
-<div align="center">
+# Localized AI Weather Prediction with Adaptive Online Learning
 
-# 🌦️ Localized AI Weather Prediction with Adaptive Online Learning
+Adaptive machine learning pipeline for localized rainfall prediction using a custom ESP32 weather station.
 
-### Edge AI • Embedded Systems • Machine Learning • Statistical Validation
-
-An end-to-end machine learning research project investigating whether an adaptive online-learning model can outperform a traditional static machine learning model for localized rainfall prediction.
-
-**ESP32 • Python • Scikit-Learn • Pandas • NumPy • SciPy • Matplotlib**
-
-</div>
+This repository documents the design, implementation, and evaluation of a low-cost weather station that investigates whether **adaptive online learning** can outperform a traditional **static machine learning model** for localized rainfall prediction. The project combines embedded systems, data collection, machine learning, and statistical analysis into a complete end-to-end research workflow.
 
 ---
 
-## 📑 Table of Contents
+## Overview
 
-- Project Overview
-- Project Summary
-- System Architecture
-- Hardware
-- Software & Machine Learning Pipeline
-- Experimental Results
-- Deployment Chronicle
-- Discussion
-- Repository Structure
-- Installation
+Traditional weather prediction models are typically trained once using historical regional data and remain unchanged after deployment. While this approach performs well at large geographic scales, it often struggles to capture localized weather patterns that develop over time.
+
+This project explores a different approach.
+
+Instead of relying exclusively on historical data, a second machine learning model continuously retrains using newly collected observations from a custom-built weather station. The objective is to determine whether continual adaptation improves rainfall prediction while maintaining comparable overall accuracy.
+
+Both models were evaluated using the same twelve-week deployment and identical environmental observations.
 
 ---
-
-# 🌎 Project Overview
 
 ## Research Question
 
-> **Can a machine learning model that continuously retrains using localized environmental data outperform a traditional static model trained only on historical regional weather observations?**
-
-Localized weather forecasting remains a challenging machine learning problem because environmental conditions often vary dramatically over short geographic distances. Coastal regions, in particular, experience rapidly changing atmospheric conditions that are poorly represented by broad regional datasets.
-
-To investigate this problem, this project combines embedded systems engineering, Internet of Things (IoT) hardware, machine learning, and statistical analysis into a fully autonomous weather prediction platform.
-
-A custom-built weather station continuously collected atmospheric telemetry over a **12-week outdoor deployment**, logging more than **2,000 consecutive operational hours**. Two machine learning models were then evaluated under identical operating conditions.
-
-- **Model A:** Static Random Forest classifier trained once on regional historical weather data.
-- **Model B:** Adaptive Random Forest classifier that retrains weekly using newly collected local observations.
-
-The primary objective was to determine whether continuous online adaptation improves precipitation prediction within a rapidly changing coastal micro-climate.
+> **Can an adaptive machine learning model that retrains on localized weather observations outperform a traditional static model trained only on historical regional data?**
 
 ---
 
-# 📌 Project Summary
+## Project Summary
 
 | Category | Value |
-|----------|--------|
-| **Project Timeline** | January 2026 – August 2026 |
-| **Deployment Period** | 12 Weeks |
-| **Location** | Carmel-by-the-Sea, California |
-| **Logged Hours** | 2,003 |
-| **Observed Rain Hours** | 416 |
-| **Weather Station** | Custom ESP32 Platform |
-| **Hardware Budget** | $150 |
-| **Primary Evaluation Metric** | Rain F1-Score |
+|-----------|-------|
+| Timeline | January–August 2026 |
+| Deployment Length | 12 Weeks |
+| Logged Data | 2,003 Hours |
+| Rain Events | 416 Hours |
+| Hardware Platform | ESP32 |
+| Sensors | Temperature, Humidity, Pressure, Rainfall |
+| Machine Learning | Random Forest |
+| Primary Metric | Rainfall F1 Score |
+| Hardware Cost | <$150 |
 
 ---
 
-# ✨ Key Features
+## Results at a Glance
 
-- 🌦️ Custom-built ESP32 weather station
-- 📡 Autonomous atmospheric telemetry collection
-- 🧠 Adaptive online-learning pipeline
-- 📈 Weekly automated model retraining
-- ⏳ Temporal feature engineering using lag variables
-- 📊 Bootstrap confidence interval estimation
-- 🔬 McNemar's significance testing
-- 📉 Weekly paired statistical analysis
-- ⚡ End-to-end edge deployment
+The adaptive model maintained nearly identical overall accuracy while substantially improving rainfall detection.
+
+| Model | Accuracy | Precision | Recall | Rain F1 |
+|------|---------:|----------:|-------:|--------:|
+| Majority Baseline | **79.23%** | — | — | — |
+| Static Random Forest | 78.03% | 41.30% | 13.70% | 0.206 |
+| Adaptive Random Forest | **79.08%** | **49.43%** | **31.25%** | **0.383** |
+
+The adaptive model improved rainfall F1-score by approximately **86%** compared to the static baseline while maintaining virtually identical overall accuracy.
+
+Rather than increasing overall accuracy alone, the adaptive model became significantly better at identifying actual rainfall events, making it more useful for practical forecasting.
 
 ---
 
-# 🏗️ System Architecture
+# System Architecture
 
-The project bridges embedded hardware with machine learning and statistical analysis through a fully automated processing pipeline.
+The project consists of four primary stages:
 
-```mermaid
-flowchart LR
+1. Environmental data collection
+2. Feature engineering
+3. Machine learning prediction
+4. Statistical evaluation
 
-A[Weather Sensors]
+```text
+                     Weather Station
 
-B[ESP32 Controller]
+        ┌─────────────────────────────┐
+        │            ESP32            │
+        └─────────────────────────────┘
+            ▲        ▲         ▲
+            │        │         │
+        BME280   Rain Gauge   SD Card
 
-C[Micro SD Storage]
+                    │
+                    ▼
 
-D[Feature Engineering]
+          Feature Engineering
+     • Cleaning
+     • Lag Variables
+     • Validation
+     • Dataset Generation
 
-E[Static Random Forest]
+              ┌──────────────┐
+              │              │
+              ▼              ▼
 
-F[Adaptive Random Forest]
+     Model A (Static)   Model B (Adaptive)
 
-G[Statistical Evaluation]
+              └──────┬───────┘
+                     ▼
 
-A --> B
-B --> C
-C --> D
-D --> E
-D --> F
-E --> G
-F --> G
+        Statistical Evaluation
 ```
 
-The ESP32 samples atmospheric sensors every five minutes and stores observations locally on a microSD card. Once transferred to the processing pipeline, the data undergoes automated feature engineering before being evaluated by both machine learning models. The resulting predictions are analyzed using multiple statistical tests to quantify differences in predictive performance.
+The ESP32 samples weather conditions every five minutes and stores each observation locally on a microSD card. After deployment, the collected data is processed through a feature engineering pipeline before being evaluated by two separate Random Forest classifiers.
+
+The static model remains unchanged throughout the experiment, while the adaptive model retrains weekly using newly collected local observations.
 
 ---
 
-# 🛰️ Hardware
+# Hardware
 
-The weather station was designed to provide reliable long-term environmental monitoring while remaining inexpensive enough to be replicated by students and hobbyists.
+The weather station was designed to provide continuous outdoor monitoring while remaining inexpensive enough to be reproduced by students and hobbyists.
 
-| Component | Purpose | Cost |
-|-----------|----------|------|
-| ESP32 | Main microcontroller | $10 |
-| BME280 | Temperature, humidity & pressure sensing | $12 |
-| Mechanical Tipping-Bucket Rain Gauge | Rainfall measurement | $30 |
-| Micro SD Module | Local data logging | $6 |
-| 32GB Industrial SD Card | Persistent storage | $8 |
-| IP65 Weatherproof Enclosure | Outdoor deployment | $15 |
-| Silicone Sealant | Weather protection | $5 |
-| Power Adapter | Continuous operation | $8 |
-| Mounting Hardware | Structural support | $10 |
+| Component | Purpose |
+|-----------|---------|
+| ESP32 | Main microcontroller |
+| BME280 | Temperature, humidity, and pressure sensing |
+| Tipping Bucket Rain Gauge | Rainfall measurement |
+| MicroSD Module | Local data storage |
+| 32 GB SD Card | Dataset logging |
+| Weatherproof Enclosure | Outdoor deployment |
+| Power Supply | Continuous operation |
 
-Total hardware cost remained under **$150**, demonstrating that statistically rigorous machine learning research can be performed using accessible, low-cost hardware.
+Total hardware cost remained below **$150**.
 
 ---
 
-# 💻 Software & Machine Learning Pipeline
+# Software Pipeline
 
-The software stack combines traditional data engineering with adaptive machine learning.
+The analysis pipeline was developed entirely in Python.
 
-| Tool | Purpose |
-|------|---------|
-| Python | Core programming language |
-| Pandas | Data cleaning and manipulation |
+| Library | Purpose |
+|---------|---------|
+| Pandas | Data processing |
 | NumPy | Numerical computation |
 | Scikit-Learn | Machine learning |
-| SciPy | Statistical hypothesis testing |
+| SciPy | Statistical analysis |
 | Matplotlib | Visualization |
+
+Before training either model, the raw sensor data undergoes several preprocessing steps:
+
+- Missing value handling
+- Sensor validation
+- Temporal feature engineering
+- Lag variable generation
+- Rainfall clipping
+- Dataset formatting
+
+These engineered features are then supplied to both machine learning models under identical conditions.
+
+---
+# Machine Learning Methodology
+
+## Model A — Static Random Forest
+
+The baseline model is a conventional Random Forest classifier trained once using historical regional weather observations. After training, the model remains fixed throughout the deployment and never incorporates newly collected environmental data.
+
+This approach represents the workflow used by many traditional machine learning systems, where models are periodically retrained offline rather than continuously adapting after deployment.
+
+---
+
+## Model B — Adaptive Random Forest
+
+The adaptive model begins with the same initialization and hyperparameters as the static model but incorporates localized observations collected during deployment.
+
+At the end of each week, newly collected data is validated, processed, and merged into the training dataset. To encourage adaptation without completely forgetting historical information, recent observations receive increased weighting during retraining.
+
+This process allows the model to gradually learn environmental characteristics unique to the deployment location while preserving knowledge from the original training dataset.
+
+---
 
 ## Feature Engineering
 
-Raw environmental telemetry is transformed into predictive features before entering either machine learning model.
+Raw sensor readings alone often contain insufficient information for accurate rainfall prediction. To better capture evolving weather patterns, additional features are generated before model training.
 
-Both models evaluate:
+The preprocessing pipeline includes:
 
-- Temperature
-- Relative humidity
-- Atmospheric pressure
-- Rainfall accumulation
+- Data validation and cleaning
+- Missing value handling
+- Rainfall clipping to remove sensor anomalies
+- One-, two-, and three-hour lag variables
+- Pressure trend calculations
+- Dataset normalization and formatting
 
-To capture temporal weather patterns, additional lag variables are generated for pressure and humidity at one-hour, two-hour, and three-hour intervals. Software debouncing and value clipping further reduce sensor noise introduced by environmental disturbances.
-
----
-
-## Machine Learning Models
-
-### Model A — Static Baseline
-
-Model A is a conventional **Random Forest Classifier** trained once using historical regional climate data.
-
-Characteristics:
-
-- Fixed parameters after training
-- No exposure to local deployment data
-- Represents traditional weather prediction workflows
-- Serves as the experimental control group
+These engineered features allow both models to recognize gradual atmospheric changes that frequently precede rainfall.
 
 ---
 
-### Model B — Adaptive Online Learning
+# Experimental Results
 
-Model B begins with the same initialization as Model A but incorporates newly collected local observations every week.
+The weather station operated continuously for twelve weeks, collecting over **2,000 hours** of environmental observations. Because approximately 80% of recorded hours were dry, overall accuracy alone is not an informative evaluation metric.
 
-Every Sunday evening the pipeline automatically retrains the model using the latest environmental data while applying a **4× weighting factor** to newly observed local samples.
+Instead, rainfall **Precision**, **Recall**, and **F1 Score** are emphasized throughout this analysis.
 
-This adaptive strategy allows the model to gradually learn Carmel's unique micro-climate rather than relying exclusively on regional historical averages.
+## Overall Performance
 
-The purpose of this architecture is to determine whether continuous online learning produces measurable improvements in localized precipitation prediction.
+| Model | Accuracy | Precision | Recall | Rain F1 |
+|------|---------:|----------:|-------:|--------:|
+| Majority Baseline | **79.23%** | — | — | — |
+| Static Random Forest | 78.03% | 41.30% | 13.70% | 0.206 |
+| Adaptive Random Forest | **79.08%** | **49.43%** | **31.25%** | **0.383** |
 
----
+Although both models achieved nearly identical overall accuracy, the adaptive model detected substantially more rainfall events while also improving prediction precision.
 
-# 📊 Experimental Results
-
-Across the twelve-week deployment, the weather station recorded **2,003 consecutive operational hours**, capturing **416 hours of rainfall**. As expected for a Mediterranean coastal climate, the dataset was heavily imbalanced, with nearly **80% of observations corresponding to dry conditions**. Because overall accuracy can therefore be misleading, **Rain F1-Score** was selected as the primary evaluation metric.
-
----
-
-## Performance Summary
-
-> **The adaptive model improved rainfall F1-score by nearly 86% compared to the static baseline while maintaining virtually identical overall accuracy.**
-
-This result demonstrates that although both models classified dry weather similarly, the adaptive model became substantially better at detecting actual rainfall events after incorporating localized observations.
-
-| Evaluation Metric | Majority Baseline | Static Model | Adaptive Model | Best |
-| :--- | :---: | :---: | :---: | :---: |
-| **Overall Accuracy** | **79.23%** | 78.03% | 79.08% | Baseline / Adaptive |
-| **Rain Precision** | 0.00% | 41.30% | **49.43%** |
-| **Rain Recall** | 0.00% | 13.70% | **31.25%** |
-| **Rain F1-Score** | 0.000 | 0.206 | **0.383** |
+The resulting **86% improvement in Rain F1 Score** represents the primary finding of this project.
 
 ---
 
-## Model Comparison
-
-### Static Random Forest
-
-| Metric | Value |
-|---------|-------|
-| Accuracy | 78.03% |
-| Precision | 41.30% |
-| Recall | 13.70% |
-| Rain F1 | 0.206 |
-
-### Adaptive Random Forest
-
-| Metric | Value |
-|---------|-------|
-| Accuracy | 79.08% |
-| Precision | 49.43% |
-| Recall | 31.25% |
-| Rain F1 | 0.383 |
-
-Although overall accuracy differed by only **1.05%**, the adaptive model nearly doubled rainfall recall while substantially improving precision. These gains translated directly into a much higher F1-score, indicating a more useful real-world forecasting system.
-
----
-
-# 📉 Confusion Matrices
+## Weekly Performance
 
 <p align="center">
-
-<img src="python/analysis/plots/confusion_matrices.png" width="700">
-
+<img src="python/analysis/weekly_accuracy_trend.png" width="850">
 </p>
 
 <p align="center">
-
-<b>Figure 1.</b> Confusion matrices comparing the static and adaptive models over the full deployment.
-
+<b>Figure 1.</b> Weekly prediction accuracy of the static and adaptive models throughout the twelve-week deployment.
 </p>
 
-The adaptive model correctly identified **130 rainfall hours**, compared to only **57** for the static model. This improvement came at the cost of additional false positives, illustrating the classic tradeoff between sensitivity and specificity.
+Both models began with identical training data and therefore similar predictive performance. As additional localized observations became available, the adaptive model gradually diverged from the static baseline, learning weather patterns specific to Carmel's coastal environment.
+
+Although weekly accuracy fluctuated due to changing weather conditions, the adaptive model generally maintained comparable or improved performance throughout the deployment.
 
 ---
 
-# 📈 Weekly Performance Evolution
+## Confusion Matrix Comparison
 
 <p align="center">
-
-<img src="python/analysis/plots/weekly_accuracy_trend.png" width="850">
-
+<img src="python/analysis/confusion_matrices.png" width="720">
 </p>
 
 <p align="center">
-
-<b>Figure 2.</b> Weekly predictive accuracy across the twelve-week deployment.
-
+<b>Figure 2.</b> Confusion matrices for the static and adaptive Random Forest classifiers.
 </p>
 
-Rather than evaluating only the final results, weekly analysis reveals how the adaptive model gradually evolved as new environmental observations became available.
+The confusion matrices illustrate the primary difference between the two models.
 
-Initially, both models performed similarly because they shared identical training parameters. As localized data accumulated, the adaptive model increasingly learned environmental behaviors unique to Carmel's coastal climate.
+The adaptive model correctly identified **130 rainfall observations**, compared to only **57** detected by the static model. This improvement came with a modest increase in false positives, reflecting a deliberate shift toward greater rainfall sensitivity.
 
----
-
-# 🗓️ Deployment Chronicle
-
-## Weeks 1–3 — Initial Learning
-
-The adaptive model opened with a remarkable **20.2% accuracy improvement** during the first week. Inspection of the raw sensor logs revealed significant mechanical noise caused by strong coastal winds triggering isolated tipping-bucket activations.
-
-Rather than simply memorizing these noisy events, the adaptive model gradually learned to ignore rainfall detections unsupported by corresponding atmospheric changes, effectively becoming a software-based noise filter.
+For practical forecasting, this tradeoff is often preferable to simply maximizing overall classification accuracy.
 
 ---
 
-## Week 4 — Feature Engineering Improvements
+## Weekly Model Comparison
 
-To further improve robustness, the processing pipeline introduced several preprocessing enhancements.
+Weekly performance highlights how the adaptive model evolved throughout deployment.
 
-Improvements included:
+| Week | Static Accuracy | Adaptive Accuracy | Difference |
+|------:|---------------:|------------------:|-----------:|
+| 1 | 70.24% | **90.48%** | +20.24% |
+| 2 | 88.10% | **88.69%** | +0.60% |
+| 3 | 77.06% | 77.06% | 0.00% |
+| 4 | 84.94% | 84.94% | 0.00% |
+| 5 | 95.83% | **100.00%** | +4.17% |
+| 6 | **84.15%** | 82.32% | −1.83% |
+| 7 | 76.65% | **79.04%** | +2.40% |
+| 8 | 75.15% | 75.15% | 0.00% |
+| 9 | **70.91%** | 68.48% | −2.42% |
+| 10 | 69.88% | **73.49%** | +3.61% |
+| 11 | **74.10%** | 63.86% | −10.24% |
+| 12 | **69.28%** | 66.27% | −3.01% |
 
-- software debouncing
-- rainfall clipping using `.clip(upper=10.0)`
-- additional three-hour lag variables
-- refined pressure trend calculations
-
-Immediately following these changes, rainfall recall increased substantially, demonstrating the importance of temporal feature engineering in localized forecasting.
-
----
-
-## Week 5 — Hardware Failure
-
-During Week 5, the tipping-bucket rain gauge became partially obstructed by debris.
-
-Despite severe storms, the sensor incorrectly reported **0.0 mm** rainfall for extended periods.
-
-Fortunately, other atmospheric sensors clearly indicated abnormal conditions:
-
-- steadily falling barometric pressure
-- rapidly increasing humidity
-- stable temperature trends inconsistent with dry weather
-
-Because these measurements confirmed sensor malfunction, **the entire week was intentionally excluded from adaptive retraining** to prevent the model from learning corrupted labels.
-
-This decision protected the integrity of the experimental dataset.
+The adaptive model showed its largest improvement during the first week of deployment before gradually converging toward the static model. Toward the end of the deployment, rapidly changing seasonal conditions temporarily reduced the adaptive model's advantage, highlighting one of the primary challenges of online learning systems.
 
 ---
 
-## Week 6 — Recovery
+# Statistical Analysis
 
-After physically clearing the rain gauge, normal operation resumed.
+Overall accuracy improvements were evaluated using three complementary statistical methods.
 
-Immediately afterward, rainfall precision nearly doubled, confirming that the exclusion protocol successfully prevented contamination of future model updates.
+| Test | Purpose |
+|------|---------|
+| McNemar's Test | Compare paired prediction accuracy |
+| Bootstrap Confidence Interval | Estimate uncertainty in accuracy improvement |
+| Weekly Paired t-Test | Evaluate consistency across deployment weeks |
 
----
-
-## Weeks 7–10 — Peak Performance
-
-These weeks represented the strongest period of adaptive learning.
-
-Without modifying decision thresholds or hyperparameters, the adaptive model naturally increased rainfall sensitivity while maintaining relatively stable precision.
-
-By Week 10 the system achieved its highest overall performance:
-
-- Rain F1-score exceeded **0.50**
-- Recall surpassed **54%**
-- Precision remained approximately **47%**
-
-This represented the project's strongest evidence that localized online learning can improve practical weather prediction.
+Together, these tests assess whether observed performance differences are statistically meaningful rather than the result of random variation.
 
 ---
+## Statistical Results
 
-## Weeks 11–12 — Seasonal Transition
+Three complementary statistical tests were performed to determine whether the observed performance differences between the two models were statistically significant.
 
-Late in the deployment, Carmel experienced an unusually volatile summer weather regime, including approximately **75 consecutive hours of rainfall**.
+### McNemar's Test
 
-Retraining on this highly unusual weather pattern caused the adaptive model to overcompensate.
+McNemar's test compares the paired predictions made by both classifiers on identical observations.
 
-As a result:
-
-- rainfall predictions became more aggressive
-- false positives increased
-- overall accuracy temporarily declined
-
-Although this reduced classification accuracy, it also revealed one of the most interesting findings of the study: adaptive models remain vulnerable to rapid distribution shifts when recent observations receive excessive weighting.
-
----
-
-# 🔬 Statistical Significance
-
-<details>
-
-<summary><b>Expand Statistical Analysis</b></summary>
-
-### McNemar Test
-
-| Metric | Value |
-|---------|------|
+| Statistic | Value |
+|----------|------:|
 | A Correct / B Incorrect | 80 |
 | A Incorrect / B Correct | 101 |
-| p-value | **0.1369** |
+| p-value | 0.1369 |
 
-The null hypothesis could not be rejected at α = 0.05, indicating that the observed accuracy difference was not statistically significant.
+At a significance level of α = 0.05, the null hypothesis cannot be rejected. Although the adaptive model produced more correct predictions overall, the improvement in overall accuracy is not statistically significant.
 
 ---
 
 ### Bootstrap Confidence Interval
 
+A bootstrap analysis was performed to estimate uncertainty in overall accuracy.
+
 | Metric | Value |
-|---------|------|
-| Mean Difference | +1.05% |
+|--------|------:|
+| Mean Accuracy Difference | +1.05% |
 | 95% Confidence Interval | [-0.25%, +2.40%] |
 
-Because zero lies within the confidence interval, the true difference in overall accuracy cannot be established with statistical confidence.
+Because the confidence interval contains zero, the true improvement in overall accuracy cannot be established with statistical confidence.
 
 ---
 
 ### Weekly Paired t-Test
 
-| Metric | Value |
-|---------|------|
+Weekly model performance was also evaluated using a paired t-test.
+
+| Statistic | Value |
+|----------|------:|
 | Mean Weekly Difference | +1.13% |
 | t-statistic | 0.549 |
-| p-value | **0.5938** |
+| p-value | 0.5938 |
 
-Weekly accuracy fluctuated considerably due to environmental variability, making long-term accuracy differences statistically indistinguishable.
-
-</details>
+Weekly accuracy varied substantially throughout deployment, resulting in no statistically significant difference in overall weekly accuracy.
 
 ---
 
-# 🔬 Discussion
+# Discussion
 
-The results reveal an important tradeoff between **predictive accuracy** and **operational usefulness**.
+The primary objective of this project was not simply to maximize classification accuracy, but to determine whether adaptive online learning could improve localized rainfall prediction.
 
-Although traditional statistical tests showed that the adaptive model did **not** significantly outperform the static baseline in terms of overall accuracy, the adaptive approach consistently demonstrated superior ability to identify actual rainfall events.
+Although the adaptive model produced only a modest increase in overall accuracy, it consistently detected substantially more rainfall events than the static baseline. Rainfall recall increased from **13.7%** to **31.3%**, while Rain F1 Score improved from **0.206** to **0.383**, representing an improvement of approximately **86%**.
 
-For highly imbalanced weather datasets, overall accuracy alone is often a poor indicator of model quality. A model that simply predicts **"dry"** for every observation would achieve nearly 80% accuracy while failing to detect every rainfall event.
+For highly imbalanced weather datasets, these improvements are more meaningful than small changes in overall accuracy. A classifier that predicts "no rain" for every observation achieves high accuracy but provides little practical value. The adaptive model instead traded a small increase in false positives for a much larger improvement in rainfall detection.
 
-By contrast, the adaptive model substantially increased rainfall recall while maintaining respectable precision, resulting in a dramatically higher F1-score.
+The deployment also highlighted practical engineering challenges associated with adaptive machine learning. During Week 5, a mechanical obstruction in the tipping-bucket rain gauge produced invalid rainfall measurements. Rather than incorporating corrupted observations into the training process, the affected data was excluded from subsequent retraining. This prevented the adaptive model from learning incorrect relationships and emphasized the importance of data validation in real-world autonomous systems.
 
-This illustrates why application-specific evaluation metrics are often more informative than raw classification accuracy.
+Finally, the adaptive model's advantage decreased during the final weeks of deployment as weather patterns changed. This suggests that while continual retraining allows a model to adapt to local conditions, it also introduces sensitivity to sudden distribution shifts. Future adaptive systems should balance responsiveness to new observations with long-term model stability.
 
----
-
-## Why Did the Adaptive Model Improve?
-
-Several factors contributed to the adaptive model's superior rainfall detection performance.
-
-### 1. Continuous Local Learning
-
-Unlike the static model, the adaptive model continually incorporated newly collected environmental observations.
-
-As additional weeks of localized weather accumulated, the model gradually learned atmospheric relationships unique to Carmel's coastal micro-climate that were absent from the original regional training dataset.
+Overall, this project demonstrates that adaptive online learning can substantially improve rainfall detection using inexpensive embedded hardware while maintaining comparable overall prediction accuracy.
 
 ---
 
-### 2. Temporal Feature Engineering
-
-Weather is inherently time-dependent.
-
-Rather than evaluating only instantaneous sensor readings, the model also considered historical pressure and humidity trends over one-, two-, and three-hour intervals.
-
-These lag variables allowed the model to recognize the gradual atmospheric transitions that frequently precede rainfall.
-
----
-
-### 3. Robust Data Validation
-
-One of the most valuable lessons from the deployment occurred during the Week 5 hardware malfunction.
-
-Instead of allowing corrupted sensor measurements to enter the training pipeline, the faulty data was automatically excluded from future retraining.
-
-This protected the adaptive model from learning incorrect weather patterns and demonstrated the importance of integrating data quality checks into real-world machine learning systems.
-
----
-
-## Why Did the Adaptive Advantage Decline?
-
-Interestingly, the adaptive model's advantage gradually decreased toward the end of the deployment.
-
-Linear regression of weekly performance differences revealed a negative trend:
-
-- **Slope:** −0.0122 improvement per week
-- **p-value:** 0.0319
-
-This suggests that the adaptive model became increasingly specialized for the most recent weather regime.
-
-When seasonal conditions shifted rapidly during Weeks 11 and 12, the model temporarily overfit recent observations and became overly sensitive to rainfall.
-
-Meanwhile, the static baseline remained comparatively stable because its parameters never changed.
-
-Rather than representing a failure of online learning, this behavior highlights one of its central engineering challenges:
-
-> **Adaptive systems must continuously balance responsiveness against long-term stability.**
-
----
-
-# 💡 Key Takeaways
-
-This project demonstrates several important principles in applied machine learning:
-
-- Adaptive learning substantially improves rainfall detection compared to a static baseline.
-- Overall accuracy alone is insufficient for evaluating highly imbalanced datasets.
-- Feature engineering contributed as much to performance as model selection.
-- Robust sensor validation is essential for reliable autonomous learning.
-- Low-cost embedded hardware can support statistically rigorous machine learning research.
-
-Perhaps the most important conclusion is that **online learning provides meaningful operational value even when improvements in overall accuracy are statistically insignificant**.
-
-For applications such as weather monitoring, correctly detecting additional rainfall events is often far more valuable than maximizing classification accuracy alone.
-
----
-
-# 📂 Repository Structure
+# Repository Structure
 
 ```text
 AI-Weather-Prediction/
@@ -494,72 +350,49 @@ AI-Weather-Prediction/
 │   ├── online_pipeline/
 │   └── analysis/
 │       ├── data_analysis.py
+│       ├── weekly_results.csv
+│       ├── results_summary.csv
 │       └── plots/
-│
-├── images/
+│           ├── weekly_accuracy_trend.png
+│           └── confusion_matrices.png
 │
 └── README.md
 ```
 
 ---
 
-# 🛠️ Installation
+# Reproducing the Results
 
 Clone the repository.
 
 ```bash
-git clone https://github.com/yourusername/ai-weather-station.git
-```
-
-Navigate into the project.
-
-```bash
-cd ai-weather-station
+git clone https://github.com/yourusername/localized-weather-ai.git
 ```
 
 Install the required Python libraries.
 
 ```bash
-pip install numpy pandas scipy matplotlib scikit-learn
+pip install numpy pandas matplotlib scipy scikit-learn
 ```
 
-Run the statistical analysis pipeline.
+Run the analysis pipeline.
 
 ```bash
-python python/analysis/data_analysis.py data/processed/predictions_log.csv
+python python/analysis/data_analysis.py
 ```
 
----
+The analysis script generates:
 
-# 📸 Repository Preview
-
-The repository includes:
-
-- Weekly accuracy visualizations
+- Performance summary tables
+- Weekly evaluation metrics
 - Confusion matrices
-- Complete processed datasets
-- Raw environmental telemetry
-- Statistical analysis scripts
-- Embedded firmware
-- Machine learning training pipeline
-- Hardware documentation
+- Weekly accuracy visualizations
+- Statistical significance tests
 
 ---
 
-# 🎓 Project Context
+# Project Scope
 
-This repository represents an independent **eight-month research initiative** integrating embedded systems engineering, machine learning, Internet of Things hardware, and statistical analysis into a fully autonomous environmental monitoring platform.
+This repository documents the complete workflow for designing, deploying, and evaluating an adaptive machine learning system for localized rainfall prediction. It includes hardware design, data collection, feature engineering, model training, statistical evaluation, and visualization of experimental results.
 
-Rather than focusing solely on predictive performance, the project emphasizes rigorous experimental design, reproducible evaluation, and transparent statistical validation.
-
-By combining inexpensive open-source hardware with modern machine learning techniques, the system demonstrates that meaningful environmental AI research can be conducted without specialized laboratory equipment.
-
-The repository documents the complete engineering process—from sensor deployment and embedded firmware to adaptive learning, statistical testing, and final performance evaluation—providing a reproducible framework for future edge AI research.
-
----
-
-<div align="center">
-
-### ⭐ If you found this project interesting, consider starring the repository!
-
-</div>
+The emphasis of this project is not solely on predictive performance, but on developing a reproducible framework for evaluating adaptive learning strategies on resource-constrained embedded systems operating in real-world environments.
